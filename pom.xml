@@ -6,9 +6,9 @@
 
     <groupId>com.mpush</groupId>
     <artifactId>mpush-alloc</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>mpush-alloc</name>
-    <description>mpuhs Server Allocator</description>
+    <description>mpush Server Allocator</description>
     <url>https://github.com/mpusher/mpush</url>
 
     <licenses>
@@ -62,7 +62,21 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.shinemo.mpush.alloc.AllocServer</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>
+                            jar-with-dependencies
+                        </descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
 </project>
