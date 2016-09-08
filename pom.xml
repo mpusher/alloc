@@ -72,7 +72,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.shinemo.mpush.alloc.AllocServer</mainClass>
+                            <mainClass>com.shinemo.mpush.alloc.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
