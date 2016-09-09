@@ -78,6 +78,7 @@ public class PushHandler implements HttpHandler {
         sendPush(pushContent, userId);
 
         byte[] data = "服务已经开始推送,请注意查收消息".getBytes(Constants.UTF_8);
+        httpExchange.getResponseHeaders().set("Content-Type","text/plain; charset=utf-8");
         httpExchange.sendResponseHeaders(200, data.length);//200, content-length
         OutputStream out = httpExchange.getResponseBody();
         out.write(data);
