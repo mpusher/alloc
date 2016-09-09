@@ -113,7 +113,7 @@ public class PushHandler implements HttpHandler {
     private byte[] readBody(HttpExchange httpExchange) throws IOException {
         InputStream in = httpExchange.getRequestBody();
         String length = httpExchange.getRequestHeaders().getFirst("content-length");
-        if (length != null) {
+        if (length != null && !length.equals("0")) {
             byte[] buffer = new byte[Integer.parseInt(length)];
             in.read(buffer);
             in.close();
