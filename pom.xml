@@ -38,12 +38,37 @@
         <dependency>
             <groupId>com.github.mpusher</groupId>
             <artifactId>mpush-cache</artifactId>
-            <version>0.0.3</version>
+            <version>0.0.4</version>
         </dependency>
         <dependency>
             <groupId>com.github.mpusher</groupId>
             <artifactId>mpush-client</artifactId>
-            <version>0.0.3</version>
+            <version>0.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mpusher</groupId>
+            <artifactId>mpush-api</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mpusher</groupId>
+            <artifactId>mpush-zk</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mpusher</groupId>
+            <artifactId>mpush-tools</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mpusher</groupId>
+            <artifactId>mpush-netty</artifactId>
+            <version>0.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mpusher</groupId>
+            <artifactId>mpush-common</artifactId>
+            <version>0.0.4</version>
         </dependency>
     </dependencies>
 

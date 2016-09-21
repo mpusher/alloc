@@ -20,10 +20,7 @@
 package com.shinemo.mpush.alloc;
 
 import com.mpush.api.Constants;
-import com.mpush.api.push.AckModel;
-import com.mpush.api.push.PushCallback;
-import com.mpush.api.push.PushContent;
-import com.mpush.api.push.PushSender;
+import com.mpush.api.push.*;
 import com.mpush.api.router.ClientLocation;
 import com.mpush.tools.Jsons;
 import com.sun.net.httpserver.HttpExchange;
@@ -38,7 +35,6 @@ import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.mpush.api.push.PushContent.PushType.NOTIFICATIONANDMESSAGE;
 
 /**
  * Created by ohun on 16/9/7.
@@ -65,50 +61,35 @@ public class PushHandler implements HttpHandler {
         Map<String, String> params = Jsons.fromJson(body, Map.class);
         String userId = params.get("userId");
         String hello = params.get("hello");
-        NotificationDO notificationDO = new NotificationDO();
-        notificationDO.content = "MPush开源推送消息," + hello;
-        notificationDO.title = "MPUSH推送";
-        notificationDO.nid = idSeq.get() % 2;
-        notificationDO.ticker = "你有一条新的消息,请注意查收";
 
-        PushContent pushContent = new PushContent(NOTIFICATIONANDMESSAGE.getValue());
-        pushContent.setMsgId("msg_" + idSeq.incrementAndGet());
-        pushContent.setContent(Jsons.toJson(notificationDO));
-
-        sendPush(pushContent, userId);
+        sendPush(userId, hello);
 
         byte[] data = "服务已经开始推送,请注意查收消息".getBytes(Constants.UTF_8);
-        httpExchange.getResponseHeaders().set("Content-Type","text/plain; charset=utf-8");
+        httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
         httpExchange.sendResponseHeaders(200, data.length);//200, content-length
         OutputStream out = httpExchange.getResponseBody();
         out.write(data);
         out.close();
     }
 
-    private void sendPush(PushContent pushContent, String userId) {
-        byte[] content = Jsons.toJson(pushContent).getBytes(Constants.UTF_8);
+    private void sendPush(String userId, String hello) {
+        NotificationDO notificationDO = new NotificationDO();
+        notificationDO.content = "MPush开源推送消息," + hello;
+        notificationDO.title = "MPUSH推送";
+        notificationDO.nid = idSeq.get() % 2;
+        notificationDO.ticker = "你有一条新的消息,请注意查收";
+        PushMsg pushMsg = PushMsg.build(MsgType.NOTIFICATION_AND_MESSAGE, Jsons.toJson(notificationDO));
+        pushMsg.setMsgId("msg_" + idSeq.incrementAndGet());
 
-        pushSender.send(content, userId, AckModel.AUTO_ACK, new PushCallback() {
-            @Override
-            public void onSuccess(String userId, ClientLocation location) {
-                logger.debug("<<< push success, userId={}, location={}", userId, location);
-            }
-
-            @Override
-            public void onFailure(String userId, ClientLocation location) {
-                logger.debug("<<< push failure, userId={}, location={}", userId, location);
-            }
-
-            @Override
-            public void onOffline(String userId, ClientLocation location) {
-                logger.debug("<<< push offline, userId={}, location={}", userId, location);
-            }
-
-            @Override
-            public void onTimeout(String userId, ClientLocation location) {
-                logger.debug("<<< push timeout, userId={}, location={}", userId, location);
-            }
-        });
+        pushSender.send(PushContext
+                .build(pushMsg)
+                .setCallback(new PushCallback() {
+                    @Override
+                    public void onResult(PushResult result) {
+                        logger.error(result.toString());
+                    }
+                })
+        );
     }
 
     private byte[] readBody(HttpExchange httpExchange) throws IOException {
