@@ -83,6 +83,7 @@ public class PushHandler implements HttpHandler {
 
         pushSender.send(PushContext
                 .build(pushMsg)
+                .setUserId(userId)
                 .setCallback(new PushCallback() {
                     @Override
                     public void onResult(PushResult result) {
