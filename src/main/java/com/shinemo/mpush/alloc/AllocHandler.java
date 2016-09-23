@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
     private List<ServerNode> serverNodes = Collections.emptyList();
 
     public void start() {
-        //ZKClient.I.start();//启动ZK
+        ZKClient.I.start();//启动ZK
         watcher = new ZKServerNodeWatcher(ZKPath.CONNECT_SERVER, new ConnectServerZKNodeCache());//监听长链接服务器节点
         watcher.beginWatch();
         RedisManager.I.init();
