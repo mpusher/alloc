@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mpush</groupId>
-    <artifactId>mpush-alloc</artifactId>
-    <version>1.0</version>
+    <artifactId>alloc</artifactId>
+    <version>0.0.4</version>
     <name>mpush-alloc</name>
     <description>mpush Server Allocator</description>
     <url>https://github.com/mpusher/mpush</url>
@@ -73,6 +73,7 @@
     </dependencies>
 
     <build>
+        <finalName>bootstrap</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -92,21 +93,57 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.shinemo.mpush.alloc.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>
-                            jar-with-dependencies
-                        </descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>zip</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <configuration>
+                            <archive>
+                                <!--生成的jar中，不要包含pom.xml和pom.properties这两个文件-->
+                                <addMavenDescriptor>false</addMavenDescriptor>
+
+                                <manifest>
+                                    <!--是否要把第三方jar放到manifest的classpath中-->
+                                    <addClasspath>true</addClasspath>
+                                    <!--生成的manifest中classpath的前缀，因为要把第三方jar放到lib目录下，所以classpath的前缀是lib/-->
+                                    <classpathPrefix>../lib/</classpathPrefix>
+                                    <!--应用的main class-->
+                                    <mainClass>com.shinemo.mpush.alloc.Main</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <finalName>alloc</finalName>
+                            <descriptors>
+                                <descriptor>assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
