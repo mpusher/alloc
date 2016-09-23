@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author ohun@live.cn (夜色)
  */
-public class PushHandler implements HttpHandler {
+/*package*/ final class PushHandler implements HttpHandler {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final PushSender pushSender = PushSender.create();
     private final AtomicInteger idSeq = new AtomicInteger();

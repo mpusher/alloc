@@ -31,13 +31,24 @@ import java.net.InetSocketAddress;
  * @author ohun@live.cn (夜色)
  */
 public class Main {
-    public static void main(String[] args) throws IOException {//正式环境可以用tomcat
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress(9999), 0);
-        httpServer.createContext("/push", new PushHandler());//模拟发送push
-        httpServer.createContext("/", new AllocServer());//模拟Alloc
-        httpServer.start();
-        Logs.Console.info("===================================================================");
-        Logs.Console.info("====================ALLOC SERVER START SUCCESS=====================");
-        Logs.Console.info("===================================================================");
+
+    public static void main(String[] args) throws IOException {
+        AllocServer server = new AllocServer();
+        server.start();
+        addHook(server);
+    }
+
+    private static void addHook(AllocServer server) {
+        Runtime.getRuntime().addShutdownHook(
+                new Thread(() -> {
+                    try {
+                        server.stop();
+                    } catch (Exception e) {
+                        Logs.Console.error("alloc server stop ex", e);
+                    }
+                    Logs.Console.info("jvm exit, all service stopped...");
+
+                }, "mpush-shutdown-hook-thread")
+        );
     }
 }
