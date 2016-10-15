@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
     }
 
     public void stop() {
-        ZKClient.I.stop();
+        if (ZKClient.I.isRunning()) ZKClient.I.stop();
         scheduledExecutor.shutdown();
     }
 

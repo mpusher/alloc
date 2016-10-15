@@ -69,9 +69,9 @@ public final class AllocServer extends BaseService {
 
     @Override
     protected void doStop(Listener listener) throws Throwable {
-        httpServer.stop(60);//1 min
-        allocHandler.stop();
+        httpServer.stop(0);//1 min
         pushHandler.stop();
+        allocHandler.stop();
         Logs.Console.info("===================================================================");
         Logs.Console.info("====================ALLOC SERVER STOPPED SUCCESS=====================");
         Logs.Console.info("===================================================================");
