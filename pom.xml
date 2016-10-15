@@ -6,7 +6,7 @@
 
     <groupId>com.mpush</groupId>
     <artifactId>alloc</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <name>mpush-alloc</name>
     <description>mpush Server Allocator</description>
     <url>https://github.com/mpusher/mpush</url>
@@ -38,42 +38,34 @@
         <dependency>
             <groupId>com.github.mpusher</groupId>
             <artifactId>mpush-cache</artifactId>
-            <version>0.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mpusher</groupId>
-            <artifactId>mpush-client</artifactId>
-            <version>0.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mpusher</groupId>
-            <artifactId>mpush-api</artifactId>
-            <version>0.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mpusher</groupId>
-            <artifactId>mpush-zk</artifactId>
-            <version>0.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mpusher</groupId>
-            <artifactId>mpush-tools</artifactId>
-            <version>0.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mpusher</groupId>
-            <artifactId>mpush-netty</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.mpusher</groupId>
             <artifactId>mpush-common</artifactId>
-            <version>0.0.4</version>
+            <version>0.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mpusher</groupId>
+            <artifactId>mpush-client</artifactId>
+            <version>0.0.5</version>
         </dependency>
     </dependencies>
 
     <build>
         <finalName>bootstrap</finalName>
+        <filters>
+            <filter>conf/conf-${deploy.env}.properties</filter>
+        </filters>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -97,6 +89,21 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <deploy.env>dev</deploy.env>
+            </properties>
+        </profile>
+        <profile>
+            <id>pub</id>
+            <properties>
+                <deploy.env>pub</deploy.env>
+            </properties>
+        </profile>
         <profile>
             <id>zip</id>
             <build>

@@ -24,7 +24,7 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>./conf/</directory>
+            <directory>target/classes/</directory>
             <outputDirectory>conf</outputDirectory>
             <includes>
                 <include>mpush.conf</include>

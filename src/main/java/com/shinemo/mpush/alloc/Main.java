@@ -20,19 +20,17 @@
 package com.shinemo.mpush.alloc;
 
 import com.mpush.tools.log.Logs;
-import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
 /**
  * Created by ohun on 16/9/7.
  *
  * @author ohun@live.cn (夜色)
  */
-public class Main {
+public final class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         AllocServer server = new AllocServer();
         server.start();
         addHook(server);
