@@ -28,6 +28,7 @@
             <outputDirectory>conf</outputDirectory>
             <includes>
                 <include>mpush.conf</include>
+                <include>logback.xml</include>
             </includes>
         </fileSet>
         <fileSet>
