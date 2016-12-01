@@ -44,16 +44,6 @@
     <dependencies>
         <dependency>
             <groupId>com.github.mpusher</groupId>
-            <artifactId>mpush-cache</artifactId>
-            <version>0.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mpusher</groupId>
-            <artifactId>mpush-common</artifactId>
-            <version>0.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.mpusher</groupId>
             <artifactId>mpush-client</artifactId>
             <version>0.0.6</version>
         </dependency>

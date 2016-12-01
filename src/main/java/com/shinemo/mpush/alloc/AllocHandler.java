@@ -54,9 +54,11 @@ import java.util.stream.Collectors;
 
     public void start() {
         ZKClient.I.start();//启动ZK
-        watcher = new ZKServerNodeWatcher(ZKPath.CONNECT_SERVER, new ConnectServerZKNodeCache());//监听长链接服务器节点
-        watcher.beginWatch();
+        watcher = new ZKServerNodeWatcher(ZKPath.CONNECT_SERVER, new ConnServerZKNodeCache());//监听长链接服务器节点
+        watcher.watch();
+
         RedisManager.I.init();
+
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         scheduledExecutor.scheduleAtFixedRate(this::refresh, 0, 5, TimeUnit.MINUTES);
     }
@@ -116,7 +118,7 @@ import java.util.stream.Collectors;
         return serverNode;
     }
 
-    private class ConnectServerZKNodeCache extends ZKServerNodeCache {
+    private class ConnServerZKNodeCache extends ZKServerNodeCache {
 
         @Override
         public void put(String fullPath, ZKServerNode node) {
