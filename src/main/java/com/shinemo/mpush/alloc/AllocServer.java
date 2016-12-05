@@ -55,6 +55,7 @@ public final class AllocServer extends BaseService {
         httpServer.setExecutor(Executors.newCachedThreadPool());//设置线程池，由于是纯内存操作，不需要队列
         httpServer.createContext("/", allocHandler);//查询mpush机器
         httpServer.createContext("/push", pushHandler);//模拟发送push
+        httpServer.createContext("/index.html", new IndexPageHandler());//查询mpush机器
     }
 
     @Override

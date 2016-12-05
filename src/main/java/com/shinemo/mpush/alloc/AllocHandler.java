@@ -68,7 +68,7 @@ import java.util.stream.Collectors;
         scheduledExecutor.shutdown();
     }
 
-    public void handle(HttpExchange exchange) throws IOException {
+    public void handle(HttpExchange httpExchange) throws IOException {
         //3.格式组装 ip:port,ip:port
         StringBuilder sb = new StringBuilder();
         Iterator<ServerNode> it = serverNodes.iterator();
@@ -83,10 +83,11 @@ import java.util.stream.Collectors;
         }
 
         byte[] data = sb.toString().getBytes(Constants.UTF_8);
-        exchange.sendResponseHeaders(200, data.length);//200, content-length
-        OutputStream out = exchange.getResponseBody();
+        httpExchange.sendResponseHeaders(200, data.length);//200, content-length
+        OutputStream out = httpExchange.getResponseBody();
         out.write(data);
         out.close();
+        httpExchange.close();
     }
 
     /**

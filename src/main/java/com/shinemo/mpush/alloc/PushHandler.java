@@ -22,6 +22,7 @@ package com.shinemo.mpush.alloc;
 import com.mpush.api.Constants;
 import com.mpush.api.push.*;
 import com.mpush.tools.Jsons;
+import com.mpush.tools.common.Strings;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.slf4j.Logger;
@@ -57,11 +58,9 @@ import java.util.concurrent.atomic.AtomicInteger;
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String body = new String(readBody(httpExchange), Constants.UTF_8);
-        Map<String, String> params = Jsons.fromJson(body, Map.class);
-        String userId = params.get("userId");
-        String hello = params.get("hello");
+        Map<String, Object> params = Jsons.fromJson(body, Map.class);
 
-        sendPush(userId, hello);
+        sendPush(params);
 
         byte[] data = "服务已经开始推送,请注意查收消息".getBytes(Constants.UTF_8);
         httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
@@ -69,11 +68,18 @@ import java.util.concurrent.atomic.AtomicInteger;
         OutputStream out = httpExchange.getResponseBody();
         out.write(data);
         out.close();
+        httpExchange.close();
     }
 
-    private void sendPush(String userId, String hello) {
+    private void sendPush(Map<String, Object> params) {
+        String userId = (String) params.get("userId");
+        String hello = (String) params.get("hello");
+        boolean broadcast = (Boolean) params.get("broadcast");
+        String condition = (String) params.get("condition");
+
+
         NotificationDO notificationDO = new NotificationDO();
-        notificationDO.content = "MPush开源推送," + hello;
+        notificationDO.content = "MPush开源推送，" + hello;
         notificationDO.title = "MPUSH推送";
         notificationDO.nid = idSeq.get() % 2;
         notificationDO.ticker = "你有一条新的消息,请注意查收";
@@ -82,7 +88,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
         pushSender.send(PushContext
                 .build(pushMsg)
-                .setUserId(userId)
+                .setUserId(Strings.isBlank(userId) ? null : userId)
+                .setBroadcast(broadcast)
+                .setCondition(Strings.isBlank(condition) ? null : condition)
                 .setCallback(new PushCallback() {
                     @Override
                     public void onResult(PushResult result) {

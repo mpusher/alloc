@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MPush Message Sender</title>
+</head>
+<body>
+<form onsubmit="return false;">
+    <label>
+        To User Id:
+        <input type="text" value="user-0" id="userId" required="required" style="width: 100%">
+    </label>
+    <br/>
+    <label>
+        Push Content:<span style="color: red">*</span>
+        <input type="text" value="hello mpush" id="hello" required="required" style="width: 100%">
+
+    </label>
+    <br/>
+    <label>
+        Broadcast:
+        <input type="checkbox" value="1" id="broadcast">
+    </label>
+    <br/>
+    <label>
+        Condition:
+        <input type="text" id="condition" placeholder="tags!=null&&tags.indexOf('mpush')>0" style="width: 100%">
+    </label>
+    <br/>
+    <input type="button" value="Send To Client" style="width: 100%" onclick="send()">
+</form>
+<script type="application/javascript">
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    function send() {
+        var broadcast = $('broadcast').checked;
+        var userId = $('userId').value;
+        var content = $('hello').value;
+        if (!userId && !broadcast) {
+            alert("please input userId.");
+            return false;
+        }
+
+        if (!content) {
+            alert("please input content.");
+            return false;
+        }
+
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/push', true);
+        xhr.setRequestHeader("context-type", "application/json; charset=utf-8");
+        xhr.onload = function (e) {
+            if (this.status == 200) {
+                alert(this.response)
+            }
+        };
+
+        xhr.send(JSON.stringify({
+            userId: userId,
+            hello: content,
+            broadcast: broadcast,
+            condition: $('condition').value
+        }));
+    }
+</script>
+</body>
+</html>
+
+
+
