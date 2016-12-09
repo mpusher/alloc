@@ -74,7 +74,7 @@ import java.util.concurrent.atomic.AtomicInteger;
     private void sendPush(Map<String, Object> params) {
         String userId = (String) params.get("userId");
         String hello = (String) params.get("hello");
-        boolean broadcast = (Boolean) params.get("broadcast");
+        Boolean broadcast = (Boolean) params.get("broadcast");
         String condition = (String) params.get("condition");
 
 
@@ -89,7 +89,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         pushSender.send(PushContext
                 .build(pushMsg)
                 .setUserId(Strings.isBlank(userId) ? null : userId)
-                .setBroadcast(broadcast)
+                .setBroadcast(broadcast != null && broadcast)
                 .setCondition(Strings.isBlank(condition) ? null : condition)
                 .setCallback(new PushCallback() {
                     @Override
