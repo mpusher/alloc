@@ -81,7 +81,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         NotificationDO notificationDO = new NotificationDO();
         notificationDO.content = "MPush开源推送，" + hello;
         notificationDO.title = "MPUSH推送";
-        notificationDO.nid = idSeq.get() % 2;
+        notificationDO.nid = idSeq.get() % 2 + 1;
         notificationDO.ticker = "你有一条新的消息,请注意查收";
         PushMsg pushMsg = PushMsg.build(MsgType.NOTIFICATION_AND_MESSAGE, Jsons.toJson(notificationDO));
         pushMsg.setMsgId("msg_" + idSeq.incrementAndGet());
