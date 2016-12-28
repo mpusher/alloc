@@ -20,19 +20,18 @@
 package com.shinemo.mpush.alloc;
 
 import com.mpush.api.Constants;
-import com.mpush.cache.redis.manager.RedisManager;
+import com.mpush.api.spi.common.CacheManagerFactory;
+import com.mpush.api.spi.common.ServiceDiscoveryFactory;
+import com.mpush.api.srd.ServiceDiscovery;
+import com.mpush.api.srd.ServiceListener;
+import com.mpush.api.srd.ServiceNames;
+import com.mpush.api.srd.ServiceNode;
 import com.mpush.common.user.UserManager;
-import com.mpush.zk.ZKClient;
-import com.mpush.zk.ZKPath;
-import com.mpush.zk.cache.ZKServerNodeCache;
-import com.mpush.zk.listener.ZKServerNodeWatcher;
-import com.mpush.zk.node.ZKServerNode;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -49,22 +48,24 @@ import java.util.stream.Collectors;
 /*package*/ final class AllocHandler implements HttpHandler {
 
     private ScheduledExecutorService scheduledExecutor;
-    private ZKServerNodeWatcher watcher;
     private List<ServerNode> serverNodes = Collections.emptyList();
+    private final ServiceDiscovery discovery = ServiceDiscoveryFactory.create();
 
     public void start() {
-        ZKClient.I.start();//启动ZK
-        watcher = new ZKServerNodeWatcher(ZKPath.CONNECT_SERVER, new ConnServerZKNodeCache());//监听长链接服务器节点
-        watcher.watch();
+        CacheManagerFactory.create().init(); //启动缓冲服务
 
-        RedisManager.I.init();
+        ServiceDiscovery discovery = ServiceDiscoveryFactory.create();// 启动发现服务
+        discovery.syncStart();
+        discovery.subscribe(ServiceNames.CONN_SERVER, new ConnServerNodeListener());
+
 
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         scheduledExecutor.scheduleAtFixedRate(this::refresh, 0, 5, TimeUnit.MINUTES);
     }
 
     public void stop() {
-        if (ZKClient.I.isRunning()) ZKClient.I.stop();
+        discovery.syncStop();
+        CacheManagerFactory.create().destroy();
         scheduledExecutor.shutdown();
     }
 
@@ -73,13 +74,13 @@ import java.util.stream.Collectors;
         StringBuilder sb = new StringBuilder();
         Iterator<ServerNode> it = serverNodes.iterator();
         if (it.hasNext()) {
-            ZKServerNode node = it.next();
-            sb.append(node.getExtranetIp()).append(':').append(node.getPort());
+            ServerNode node = it.next();
+            sb.append(node.host).append(':').append(node.port);
         }
 
         while (it.hasNext()) {
-            ZKServerNode node = it.next();
-            sb.append(',').append(node.getExtranetIp()).append(':').append(node.getPort());
+            ServerNode node = it.next();
+            sb.append(',').append(node.host).append(':').append(node.port);
         }
 
         byte[] data = sb.toString().getBytes(Constants.UTF_8);
@@ -95,7 +96,7 @@ import java.util.stream.Collectors;
      */
     private void refresh() {
         //1.从缓存中拿取可用的长链接服务器节点
-        Collection<ZKServerNode> nodes = watcher.getCache().values();
+        List<ServiceNode> nodes = discovery.lookup(ServiceNames.CONN_SERVER);
         if (nodes.size() > 0) {
             //2.对serverNodes可以按某种规则排序,以便实现负载均衡,比如:随机,轮询,链接数量等
             this.serverNodes = nodes
@@ -110,42 +111,39 @@ import java.util.stream.Collectors;
         return UserManager.I.getOnlineUserNum(publicIP);
     }
 
-    private ServerNode convert(ZKServerNode node) {
-        ServerNode serverNode = new ServerNode();
-        serverNode.setExtranetIp(node.getExtranetIp());
-        serverNode.setIp(node.getIp());
-        serverNode.setPort(node.getPort());
-        serverNode.setOnlineUserNum(getOnlineUserNum(node.getExtranetIp()));
-        return serverNode;
+    private ServerNode convert(ServiceNode node) {
+        String public_ip = node.getAttr(ServiceNames.ATTR_PUBLIC_IP);
+        long onlineUserNum = getOnlineUserNum(public_ip);
+        return new ServerNode(node.getHost(), node.getPort(), onlineUserNum);
     }
 
-    private class ConnServerZKNodeCache extends ZKServerNodeCache {
+    private class ConnServerNodeListener implements ServiceListener {
 
         @Override
-        public void put(String fullPath, ZKServerNode node) {
-            super.put(fullPath, node);
+        public void onServiceAdded(String s, ServiceNode serviceNode) {
             refresh();
         }
 
         @Override
-        public ZKServerNode remove(String fullPath) {
-            ZKServerNode node = super.remove(fullPath);
+        public void onServiceUpdated(String s, ServiceNode serviceNode) {
             refresh();
-            return node;
         }
 
         @Override
-        public void clear() {
-            super.clear();
+        public void onServiceRemoved(String s, ServiceNode serviceNode) {
             refresh();
         }
     }
 
-    private static class ServerNode extends ZKServerNode implements Comparable<ServerNode> {
+    private static class ServerNode implements Comparable<ServerNode> {
         long onlineUserNum = 0;
+        String host;
+        int port;
 
-        public void setOnlineUserNum(long onlineUserNum) {
+        public ServerNode(String host, int port, long onlineUserNum) {
             this.onlineUserNum = onlineUserNum;
+            this.host = host;
+            this.port = port;
         }
 
         @Override
