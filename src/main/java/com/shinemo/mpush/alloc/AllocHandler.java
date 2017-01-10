@@ -114,7 +114,7 @@ import java.util.stream.Collectors;
     private ServerNode convert(ServiceNode node) {
         String public_ip = node.getAttr(ServiceNames.ATTR_PUBLIC_IP);
         long onlineUserNum = getOnlineUserNum(public_ip);
-        return new ServerNode(node.getHost(), node.getPort(), onlineUserNum);
+        return new ServerNode(public_ip, node.getPort(), onlineUserNum);
     }
 
     private class ConnServerNodeListener implements ServiceListener {
