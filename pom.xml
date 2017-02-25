@@ -6,7 +6,7 @@
 
     <groupId>com.mpush</groupId>
     <artifactId>alloc</artifactId>
-    <version>0.7.0</version>
+    <version>0.7.1</version>
     <name>mpush-alloc</name>
     <description>mpush Server Allocator</description>
     <url>https://github.com/mpusher/mpush</url>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.github.mpusher</groupId>
             <artifactId>mpush-client</artifactId>
-            <version>0.7.0</version>
+            <version>0.7.1</version>
         </dependency>
     </dependencies>
 
