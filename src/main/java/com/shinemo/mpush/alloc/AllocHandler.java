@@ -50,13 +50,19 @@ import java.util.stream.Collectors;
     private ScheduledExecutorService scheduledExecutor;
     private List<ServerNode> serverNodes = Collections.emptyList();
     private final ServiceDiscovery discovery = ServiceDiscoveryFactory.create();
+    
+    private String server;//需要监控的server引用ServiceNames.CONN_SERVER、ServiceNames.WS_SERVER
+    
+    public AllocHandler(String server) {
+		this.server = server;
+	}
 
-    public void start() {
+	public void start() {
         CacheManagerFactory.create().init(); //启动缓冲服务
 
         ServiceDiscovery discovery = ServiceDiscoveryFactory.create();// 启动发现服务
         discovery.syncStart();
-        discovery.subscribe(ServiceNames.CONN_SERVER, new ConnServerNodeListener());
+        discovery.subscribe(server, new ConnServerNodeListener());
 
 
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -96,7 +102,7 @@ import java.util.stream.Collectors;
      */
     private void refresh() {
         //1.从缓存中拿取可用的长链接服务器节点
-        List<ServiceNode> nodes = discovery.lookup(ServiceNames.CONN_SERVER);
+        List<ServiceNode> nodes = discovery.lookup(server);
         if (nodes.size() > 0) {
             //2.对serverNodes可以按某种规则排序,以便实现负载均衡,比如:随机,轮询,链接数量等
             this.serverNodes = nodes

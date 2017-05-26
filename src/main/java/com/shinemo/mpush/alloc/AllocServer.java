@@ -22,6 +22,7 @@ package com.shinemo.mpush.alloc;
 import com.mpush.api.service.BaseService;
 import com.mpush.api.service.Listener;
 import com.mpush.api.service.ServiceException;
+import com.mpush.api.srd.ServiceNames;
 import com.mpush.tools.config.CC;
 import com.mpush.tools.log.Logs;
 import com.sun.net.httpserver.HttpServer;
@@ -39,6 +40,7 @@ public final class AllocServer extends BaseService {
 
     private HttpServer httpServer;
     private AllocHandler allocHandler;
+    private AllocHandler wsAllocHandler;//ws负载均衡
     private PushHandler pushHandler;
 
     @Override
@@ -46,7 +48,8 @@ public final class AllocServer extends BaseService {
         try {
             int port = CC.mp.net.cfg.getInt("alloc-server-port");
             this.httpServer = HttpServer.create(new InetSocketAddress(port), 0);
-            this.allocHandler = new AllocHandler();
+            this.allocHandler = new AllocHandler(ServiceNames.CONN_SERVER);
+            this.wsAllocHandler = new AllocHandler(ServiceNames.WS_SERVER);
             this.pushHandler = new PushHandler();
         } catch (IOException e) {
             throw new ServiceException(e);
@@ -54,6 +57,7 @@ public final class AllocServer extends BaseService {
 
         httpServer.setExecutor(Executors.newCachedThreadPool());//设置线程池，由于是纯内存操作，不需要队列
         httpServer.createContext("/", allocHandler);//查询mpush机器
+        httpServer.createContext("/ws", wsAllocHandler);//查询mpush机器(ws)
         httpServer.createContext("/push", pushHandler);//模拟发送push
         httpServer.createContext("/index.html", new IndexPageHandler());//查询mpush机器
     }
@@ -62,6 +66,7 @@ public final class AllocServer extends BaseService {
     protected void doStart(Listener listener) throws Throwable {
         pushHandler.start();
         allocHandler.start();
+        wsAllocHandler.start();
         httpServer.start();
         Logs.Console.info("===================================================================");
         Logs.Console.info("====================ALLOC SERVER START SUCCESS=====================");
@@ -73,6 +78,7 @@ public final class AllocServer extends BaseService {
         httpServer.stop(0);//1 min
         pushHandler.stop();
         allocHandler.stop();
+        wsAllocHandler.stop();
         Logs.Console.info("===================================================================");
         Logs.Console.info("====================ALLOC SERVER STOPPED SUCCESS=====================");
         Logs.Console.info("===================================================================");
