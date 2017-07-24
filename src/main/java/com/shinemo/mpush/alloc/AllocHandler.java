@@ -113,6 +113,9 @@ import java.util.stream.Collectors;
 
     private ServerNode convert(ServiceNode node) {
         String public_ip = node.getAttr(ServiceNames.ATTR_PUBLIC_IP);
+        if (public_ip == null) {
+            public_ip = node.getHost();
+        }
         long onlineUserNum = getOnlineUserNum(public_ip);
         return new ServerNode(node.getHost(), node.getPort(), onlineUserNum);
     }
