@@ -47,9 +47,10 @@ import java.util.stream.Collectors;
  */
 /*package*/ final class AllocHandler implements HttpHandler {
 
-    private ScheduledExecutorService scheduledExecutor;
     private List<ServerNode> serverNodes = Collections.emptyList();
+    private ScheduledExecutorService scheduledExecutor;
     private final ServiceDiscovery discovery = ServiceDiscoveryFactory.create();
+    private final UserManager userManager = new UserManager(null);
 
     public void start() {
         CacheManagerFactory.create().init(); //启动缓冲服务
@@ -108,11 +109,14 @@ import java.util.stream.Collectors;
     }
 
     private long getOnlineUserNum(String publicIP) {
-        return UserManager.I.getOnlineUserNum(publicIP);
+        return userManager.getOnlineUserNum(publicIP);
     }
 
     private ServerNode convert(ServiceNode node) {
         String public_ip = node.getAttr(ServiceNames.ATTR_PUBLIC_IP);
+        if (public_ip == null) {
+            public_ip = node.getHost();
+        }
         long onlineUserNum = getOnlineUserNum(public_ip);
         return new ServerNode(public_ip, node.getPort(), onlineUserNum);
     }

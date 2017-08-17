@@ -94,7 +94,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 .setCallback(new PushCallback() {
                     @Override
                     public void onResult(PushResult result) {
-                        logger.error(result.toString());
+                        logger.info(result.toString());
                     }
                 })
         );

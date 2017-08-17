@@ -43,14 +43,12 @@ public final class AllocServer extends BaseService {
 
     @Override
     public void init() {
-        try {
-            int port = CC.mp.net.cfg.getInt("alloc-server-port");
-            this.httpServer = HttpServer.create(new InetSocketAddress(port), 0);
-            this.allocHandler = new AllocHandler();
-            this.pushHandler = new PushHandler();
-        } catch (IOException e) {
-            throw new ServiceException(e);
-        }
+        int port = CC.mp.net.cfg.getInt("alloc-server-port");
+        boolean https = "https".equals(CC.mp.net.cfg.getString("alloc-server-protocol"));
+
+        this.httpServer = HttpServerCreator.createServer(port, https);
+        this.allocHandler = new AllocHandler();
+        this.pushHandler = new PushHandler();
 
         httpServer.setExecutor(Executors.newCachedThreadPool());//设置线程池，由于是纯内存操作，不需要队列
         httpServer.createContext("/", allocHandler);//查询mpush机器
