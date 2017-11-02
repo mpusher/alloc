@@ -21,10 +21,12 @@ package com.shinemo.mpush.alloc;
 
 import com.mpush.api.Constants;
 import com.mpush.api.push.*;
+import com.mpush.common.druid.MysqlConnecter;
 import com.mpush.tools.Jsons;
 import com.mpush.tools.common.Strings;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final PushSender pushSender = PushSender.create();
     private final AtomicInteger idSeq = new AtomicInteger();
+    String message = null;
 
     public void start() {
         pushSender.start();
@@ -62,7 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
         sendPush(params);
 
-        byte[] data = "服务已经开始推送,请注意查收消息".getBytes(Constants.UTF_8);
+        byte[] data = message.getBytes(Constants.UTF_8);
         httpExchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
         httpExchange.sendResponseHeaders(200, data.length);//200, content-length
         OutputStream out = httpExchange.getResponseBody();
@@ -77,27 +80,38 @@ import java.util.concurrent.atomic.AtomicInteger;
         Boolean broadcast = (Boolean) params.get("broadcast");
         String condition = (String) params.get("condition");
 
+        //验证用户在数据库中是否存在
+        MysqlConnecter mc = new MysqlConnecter();
+        String mobile = mc.selectOne("select mobile from m_user where device_id='"+userId+"'");
+        System.out.println("-----绑定用户在数据库--------"+mobile);
+        if (StringUtils.isBlank(mobile)){
+            message = "绑定用户在数据库中不存在：userId="+userId;
+        }else {
+            NotificationDO notificationDO = new NotificationDO();
+            //notificationDO.content = "MPush开源推送，" + hello;
+            notificationDO.content = hello;
+            //notificationDO.title = "消息推送";
+            //notificationDO.nid = idSeq.get() % 2 + 1;
+            //notificationDO.ticker = "你有一条新的消息,请注意查收";
+            System.out.println("json内容："+Jsons.toJson(notificationDO));
+            PushMsg pushMsg = PushMsg.build(MsgType.NOTIFICATION_AND_MESSAGE, Jsons.toJson(notificationDO));
+            pushMsg.setMsgId("msg_" + idSeq.incrementAndGet());
 
-        NotificationDO notificationDO = new NotificationDO();
-        notificationDO.content = "MPush开源推送，" + hello;
-        notificationDO.title = "MPUSH推送";
-        notificationDO.nid = idSeq.get() % 2 + 1;
-        notificationDO.ticker = "你有一条新的消息,请注意查收";
-        PushMsg pushMsg = PushMsg.build(MsgType.NOTIFICATION_AND_MESSAGE, Jsons.toJson(notificationDO));
-        pushMsg.setMsgId("msg_" + idSeq.incrementAndGet());
+            pushSender.send(PushContext
+                    .build(pushMsg)
+                    .setUserId(Strings.isBlank(userId) ? null : userId)
+                    .setBroadcast(broadcast != null && broadcast)
+                    .setCondition(Strings.isBlank(condition) ? null : condition)
+                    .setCallback(new PushCallback() {
+                        @Override
+                        public void onResult(PushResult result) {
+                            logger.info(result.toString());
+                        }
+                    })
+            );
+            message = "服务已经开始推送,请注意查收消息";
+        }
 
-        pushSender.send(PushContext
-                .build(pushMsg)
-                .setUserId(Strings.isBlank(userId) ? null : userId)
-                .setBroadcast(broadcast != null && broadcast)
-                .setCondition(Strings.isBlank(condition) ? null : condition)
-                .setCallback(new PushCallback() {
-                    @Override
-                    public void onResult(PushResult result) {
-                        logger.info(result.toString());
-                    }
-                })
-        );
     }
 
     private byte[] readBody(HttpExchange httpExchange) throws IOException {
