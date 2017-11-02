@@ -19,6 +19,10 @@ mpush allocator demo
 >
 > content-type : text/plain;charset=utf-8 
 
-### 其他 123456789
+### 打包部署
+alloc打包方法
+进入master目录 运行命令：mvn install（或者将mpush-client-0.8.0.jar手动放入alloc的jar文件夹下）
+进入alloc目录，运行命令
+mvn clean package -Pzip,pub
 
-####改动
+
