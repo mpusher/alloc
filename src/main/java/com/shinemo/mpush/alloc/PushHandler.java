@@ -21,10 +21,10 @@ package com.shinemo.mpush.alloc;
 
 import com.mpush.api.Constants;
 import com.mpush.api.push.*;
-import com.mpush.common.druid.MysqlConnecter;
 import com.mpush.tools.Jsons;
 import com.mpush.tools.common.Strings;
 import com.sun.net.httpserver.HttpExchange;
+import com.mpush.common.druid.MysqlConnecter;
 import com.sun.net.httpserver.HttpHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
